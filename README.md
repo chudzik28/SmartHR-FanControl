@@ -1,6 +1,6 @@
 # SmartHR FanControl
 
-![App Icon](<LINK_DO_PLIKU_IKONY_W_REPOZYTORIUM>)
+![App Icon](<https://github.com/chudzik28/SmartHR-FanControl/blob/master/assets/app_icon.png?raw=true>)
 
 **Automate your Xiaomi Smart Fan based on your heart rate.**
 
@@ -22,11 +22,9 @@ SmartHR FanControl is a free, open-source Android application that connects to y
 
 ## Screenshots
 
-*(Tutaj wstawisz swoje screenshoty. Zobacz instrukcję poniżej, jak to zrobić)*
-
 | Main Screen | HR Sensors | Settings |
 | :---: | :---: | :---: |
-| ![Main Screen](<LINK_DO_SCREENSHOTU_1>) | ![HR Sensors Screen](<LINK_DO_SCREENSHOTU_2>) | ![Settings Screen](<LINK_DO_SCREENSHOTU_3>) |
+| ![Main Screen](<https://github.com/chudzik28/SmartHR-FanControl/blob/master/assets/screenshot_main.jpg?raw=true>) | ![HR Sensors Screen](<https://github.com/chudzik28/SmartHR-FanControl/blob/master/assets/screenshot_hrsensors1.jpg?raw=true>) | ![Settings Screen](<https://github.com/chudzik28/SmartHR-FanControl/blob/master/assets/screenshot_automode_1.jpg?raw=true>) |
 
 ---
 
