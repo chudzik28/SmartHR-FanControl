@@ -349,20 +349,18 @@ private fun InfoContent(navController: NavController) {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        ExpandableInfoCard(title = stringResource(id = R.string.info_supported_devices_title)) {
-            Text(text = stringResource(id = R.string.info_supported_devices_content))
-        }
         ExpandableInfoCard(title = stringResource(id = R.string.info_instructions_title)) {
-            Text(text = stringResource(id = R.string.info_instructions_content))
+            HtmlText(html = stringResource(id = R.string.info_instructions_content))
+        }
+        ExpandableInfoCard(title = stringResource(id = R.string.info_supported_devices_title)) {
+            HtmlText(html = stringResource(id = R.string.info_supported_devices_content))
         }
         ExpandableInfoCard(title = stringResource(id = R.string.info_privacy_policy_title)) {
-            Text(text = stringResource(id = R.string.info_privacy_policy_content))
+            HtmlText(html = stringResource(id = R.string.info_privacy_policy_content))
         }
         ExpandableInfoCard(title = stringResource(id = R.string.info_terms_of_use_title)) {
-            Text(text = stringResource(id = R.string.info_terms_of_use_content))
+            HtmlText(html = stringResource(id = R.string.info_terms_of_use_content))
         }
-
-        // NOWA KARTA LICENCJI APLIKACJI
         ExpandableInfoCard(title = stringResource(id = R.string.info_gpl_license_title)) {
             HtmlText(html = stringResource(id = R.string.info_gpl_license_content))
         }
@@ -401,6 +399,7 @@ private fun InfoContent(navController: NavController) {
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
+                // Ten string nie ma HTML, więc zwykły Text jest OK
                 Text(
                     text = stringResource(id = R.string.info_acknowledgements_content),
                     style = MaterialTheme.typography.bodyMedium,
@@ -486,7 +485,7 @@ fun HtmlText(html: String, modifier: Modifier = Modifier) {
     val linkColor = MaterialTheme.colorScheme.primary
 
     AndroidView(
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth(),
         factory = { context ->
             TextView(context).apply {
                 movementMethod = LinkMovementMethod.getInstance()
