@@ -1,0 +1,111 @@
+<resources>
+    <string name="app_name">SmartHr FanControl</string>
+
+    <string name="info_supported_devices_title">Supported Devices</string>
+    <string name="info_supported_devices_content">
+        The app is designed to be compatible with a range of Xiaomi Smart Fans. The following models should be supported:\n\n
+        • Pedestal Fan P9\n
+        • Pedestal Fan P10\n
+        • Mija Pedestal Fan\n
+        • Pedestal Fan P15\n
+        • Mi Smart Standing Fan 2\n
+        • Mi Smart Standing Fan 2 Pro\n\n
+        <b>Please Note:</b> While the app is designed to work with all the models listed above, it has only been physically tested on the <b>Mi Smart Standing Fan 2 Pro</b>. Functionality with other models is based on the protocol implementation from the \'python-miio\' library and is not guaranteed.
+    </string>
+
+    <string name="info_instructions_title">Instructions</string>
+    <string name="info_instructions_content">
+    Welcome to SmartHR FanControl! This guide will help you set up the app in a few simple steps.\n\n
+
+    <b>Step 1: Obtain Fan IP Address and Token</b>\n
+    To control your Xiaomi fan, the app needs its local IP address and a unique 32-character token. Since this app is not affiliated with Xiaomi, you need to retrieve this information yourself using open-source tools.\n\n
+    A highly recommended and user-friendly tool for this is the "Xiaomi Cloud Tokens Extractor". You can find it by searching online or visiting its GitHub page. Simply log in with your Xiaomi/Mi Home account, and the tool will display the IP and Token for all your devices.\n\n
+
+    <b>Step 2: Configure the Fan in the App</b>\n
+    1. Navigate to the <b>Settings</b> tab (the gear icon).\n
+    2. In the "Fan Config" section, enter the IP Address and Token you obtained in the previous step.\n
+    3. Tap the <b>SAVE FAN SETTINGS</b> button. The app will attempt to connect. If successful, the fan status on the Main screen will change to "Connected".\n\n
+
+    <b>Step 3: Pair Your Heart Rate Sensor</b>\n
+    1. Navigate to the <b>HR Sensors</b> tab (the Bluetooth icon).\n
+    2. Tap the <b>SEARCH HEART RATE SENSORS</b> button. The app will scan for nearby BLE heart rate devices for 10 seconds.\n
+    3. New devices will appear under "Detected Devices". Tap <b>Pair</b> to add a sensor to your saved list.\n
+    4. Once a device is paired, it will appear in the "Paired Sensors" list. Tap <b>Select</b> to make it the active sensor for the app.\n\n
+
+    <b>Step 4: Configure Auto Mode (Optional)</b>\n
+    The app comes with sensible default settings, but you can customize them in the <b>Settings -> Auto Mode</b> tab.\n
+    • <b>Heart Rate Range:</b> Defines your effort zone. Below HR Min, the fan runs at minimum speed; above HR Max, at maximum speed.\n
+    • <b>Fan Speed Range:</b> Sets the minimum and maximum speed limits for Auto Mode.\n
+    • <b>Exponent &amp; Smoothing:</b> Advanced settings to control how quickly and smoothly the fan reacts to changes in your heart rate. You can learn more by tapping the (i) icon next to each setting.\n
+    After making changes, remember to tap <b>SAVE AUTO MODE SETTINGS</b>.\n\n
+
+    <b>Step 5: Start Controlling!</b>\n
+    You are now ready to go!\n
+    1. On the <b>Main</b> screen (the home icon), first turn the fan on using the main <b>FAN ON</b> button at the bottom.\n
+    2. To activate automatic control, toggle the <b>Auto Mode</b> switch. The fan speed will now adjust automatically based on your heart rate.\n
+    3. To control the speed manually, make sure Auto Mode is off and use the slider.\n\n
+
+    Enjoy your workout!
+    \n\n<b>Visual Guide with Screenshots</b>\n
+    For a more detailed, visual guide with screenshots, please visit the project\'s official GitHub page:\n
+    &lt;a href="[LINK_DO_TWOJEGO_GITGUBA]"&gt;[LINK_DO_TWOJEGO_GITGUBA]&lt;/a&gt;
+</string>
+
+    <string name="info_privacy_policy_title">Privacy Policy</string>
+    <string name="info_privacy_policy_content">
+    Last updated: October 30, 2025\n\n
+    Thank you for using SmartHR FanControl. Your privacy is critically important to us.\n\n
+    <b>1. Data Collection and Use</b>\n
+    This application is a hobby project and operates on a principle of "zero data collection." We do not collect, store, or transmit any personal or usage data to the developer or any third party. The application does not contain advertisements or any form of analytics tracking.\n\n
+    <b>2. Data Storage and Security</b>\n
+    To function, the application requires you to provide sensitive information, such as your fan\'s IP address and token, as well as the MAC addresses of your Bluetooth heart rate sensors. All of this data is stored exclusively on your device. We use Android\'s Jetpack Security library (EncryptedSharedPreferences) to encrypt this data, ensuring it is protected and inaccessible to other applications.\n\n
+    <b>3. Heart Rate (Biometric) Data</b>\n
+    The application receives heart rate data from your chosen Bluetooth sensor in real-time to control your fan. This biometric data is processed entirely on your device and is never stored, logged, or transmitted off your device by the application.\n\n
+    The "Heart Rate Sharing" feature allows you to re-broadcast your heart rate as a standard Bluetooth HR peripheral. Enabling this feature is your choice and responsibility. The application only facilitates this broadcast; it does not monitor or record where this data is sent.\n\n
+    <b>4. Permissions</b>\n
+    The application requires certain permissions to function (e.g., Wi-Fi and Bluetooth access). These permissions are used exclusively for the application\'s core functionality: discovering and communicating with your HR sensor and fan, and optionally, re-broadcasting your heart rate.\n\n
+    <b>5. Third-Party Services</b>\n
+    The application includes a link to "Buy Me a Coffee" for voluntary support. If you choose to use this link, you will be redirected to a third-party website. Your interaction with that website is governed by their own privacy policy and terms of service.\n\n
+    <b>6. Changes to This Privacy Policy</b>\n
+    We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy within the application.
+</string>
+
+    <string name="info_terms_of_use_title">Terms of Use</string>
+    <string name="info_terms_of_use_content">
+        Last updated: October 30, 2025\n\n
+        By downloading or using the SmartHR FanControl application ("App"), you agree to be bound by these Terms of Use.\n\n
+        <b>1. Software License</b>\n
+        This App is free software, distributed under the terms of the GNU General Public License v3.0 (GPLv3). The full text of the license governs your rights to use, modify, and distribute this software. A summary of these terms is provided for convenience, but the full license text is legally binding.\n\n
+        <b>2. "As Is" Basis and Limitation of Liability</b>\n
+        This App is a personal, hobby project and is provided "AS IS" without any warranties of any kind. In no event shall the developer be liable for any damages resulting from the use or inability to use the App. The entire risk as to the quality and performance of the App is with you.\n\n
+        <b>3. Disclaimer of Affiliation</b>\n
+        This App is an independent project and is not affiliated with, authorized, maintained, sponsored, or endorsed by Xiaomi Inc. or any of its affiliates or subsidiaries.\n\n
+        <b>4. User Responsibility</b>\n
+        You are solely responsible for obtaining your fan\'s IP address and token using third-party tools and for the consequences of using any feature of the App, including "Heart Rate Sharing."\n\n
+        <b>5. Voluntary Support</b>\n
+        The App may include a link for voluntary financial support. Supporting the project is entirely optional and does not grant you any additional features or rights.
+    </string>
+    <string name="info_oss_licenses_title">Open Source Licenses</string>
+    <string name="info_oss_licenses_summary">View licenses of open source software used in this app.</string>
+    <string name="info_acknowledgements_title">Acknowledgements</string>
+    <string name="info_acknowledgements_content">
+        The core fan control logic in this application is a Kotlin reimplementation of the excellent work done by the developers
+        of the open-source \'python-miio\' library, which is licensed under the GNU General Public License v3.0.
+        This project would not have been possible without their efforts.
+    </string>
+    <string name="info_gpl_license_title">GNU GPL v3.0 License</string>
+    <string name="info_gpl_license_content">
+        This program is free software: you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version.\n\n
+        This program is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+        GNU General Public License for more details.\n\n
+        You should have received a copy of the GNU General Public License
+        along with this program. If not, see &lt;a href="https://www.gnu.org/licenses/gpl-3.0.html"&gt;https://www.gnu.org/licenses/gpl-3.0.html&lt;/a&gt;.\n\n
+        The complete source code for this application is available at:
+        &lt;a href="[LINK_DO_TWOJEGO_GITGUBA]"&gt;[LINK_DO_TWOJEGO_GITGUBA]&lt;/a&gt;
+    </string>
+</resources>
