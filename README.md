@@ -56,9 +56,7 @@ The core fan control logic in this application is a Kotlin reimplementation of t
 
 This is a hobby project developed in my free time. If you find this app useful, please consider supporting its development:
 
-<a href="<https://buymeacoffee.com/chudzim>">
-  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" >
-</a>
+[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://buymeacoffee.com/chudzim)
 
 ---
 
