@@ -82,6 +82,7 @@ import com.chudzikiewicz.smarthrfancontrol.ui.SettingsManager
 import com.chudzikiewicz.smarthrfancontrol.ui.components.FanCurveChart
 import com.chudzikiewicz.smarthrfancontrol.ui.components.HrAlgorithmInputFields
 import com.chudzikiewicz.smarthrfancontrol.ui.components.generateChartPoints
+import com.chudzikiewicz.smarthrfancontrol.ui.components.HtmlText
 
 private enum class SettingsTab {
     FAN, HR, INFO
@@ -399,10 +400,8 @@ private fun InfoContent(navController: NavController) {
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                // Ten string nie ma HTML, więc zwykły Text jest OK
-                Text(
-                    text = stringResource(id = R.string.info_acknowledgements_content),
-                    style = MaterialTheme.typography.bodyMedium,
+                HtmlText(
+                    html = stringResource(id = R.string.info_acknowledgements_content),
                 )
             }
         }
@@ -475,26 +474,6 @@ fun ResetConfirmationDialog(
             TextButton(onClick = onDismiss) {
                 Text("Cancel")
             }
-        }
-    )
-}
-
-@Composable
-fun HtmlText(html: String, modifier: Modifier = Modifier) {
-    val textColor = MaterialTheme.colorScheme.onSurface
-    val linkColor = MaterialTheme.colorScheme.primary
-
-    AndroidView(
-        modifier = modifier.fillMaxWidth(),
-        factory = { context ->
-            TextView(context).apply {
-                movementMethod = LinkMovementMethod.getInstance()
-                setTextColor(textColor.toArgb())
-                setLinkTextColor(linkColor.toArgb())
-            }
-        },
-        update = {
-            it.text = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_COMPACT)
         }
     )
 }
