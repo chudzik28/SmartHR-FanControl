@@ -10,7 +10,7 @@ plugins {
 android {
     namespace = "com.chudzikiewicz.smarthrfancontrol"
     compileSdk = 36
-
+    ndkVersion = "25.1.8937393"
     signingConfigs {
         create("release") {
             // Bezpieczne odczytywanie danych z pliku gradle.properties
@@ -35,11 +35,15 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters.addAll(listOf("arm64-v8a", "x86_64"))
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

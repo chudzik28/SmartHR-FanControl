@@ -69,3 +69,6 @@
     @androidx.compose.runtime.Composable <methods>;
 }
 -keep class androidx.compose.runtime.internal.ComposableLambda { *; }
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
