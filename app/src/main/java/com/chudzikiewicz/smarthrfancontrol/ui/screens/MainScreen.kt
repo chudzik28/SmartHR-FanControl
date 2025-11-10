@@ -406,6 +406,6 @@ fun SupportButton(url: String) {
             modifier = Modifier.size(ButtonDefaults.IconSize)
         )
         Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-        Text("Support the Project")
+        Text("Buy me a coffee")
     }
 }
