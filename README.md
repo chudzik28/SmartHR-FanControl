@@ -1,10 +1,20 @@
 # SmartHR FanControl
 
-![App Icon](<https://github.com/chudzik28/SmartHR-FanControl/blob/master/assets/app_icon.png?raw=true>)
+![App Icon](https://github.com/chudzik28/SmartHR-FanControl/blob/master/assets/app_icon.png?raw=true)
 
 **Automate your Xiaomi Smart Fan based on your heart rate.**
 
 SmartHR FanControl is a free, open-source Android application that connects to your Bluetooth heart rate sensor and dynamically controls the speed of your Xiaomi Smart Fan. It's the perfect companion for indoor training sessions on a bike trainer, treadmill, or any other workout, keeping you cool by adjusting the fan speed to your effort level.
+
+---
+
+## Get the App
+
+<a href='<LINK_DO_APLIKACJI_W_GOOGLE_PLAY>'>
+    <img alt='Get it on Google Play'
+         src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'
+         width='240'/>
+</a>
 
 ---
 
@@ -20,11 +30,26 @@ SmartHR FanControl is a free, open-source Android application that connects to y
 
 ---
 
+## Supported Devices
+
+The app is designed to be compatible with a range of Xiaomi Smart Fans. The following models should be supported:
+
+*   Pedestal Fan P9 (`dmaker.fan.p9`)
+*   Pedestal Fan P10 (`dmaker.fan.p10`)
+*   Mija Pedestal Fan (`dmaker.fan.p11`)
+*   Pedestal Fan P15 (`dmaker.fan.p15`)
+*   Mi Smart Standing Fan 2 (`dmaker.fan.p18`)
+*   Mi Smart Standing Fan 2 Pro (`dmaker.fan.p33`)
+
+**Please Note:** While the app is designed to work with all the models listed above, it has only been physically tested on the **Mi Smart Standing Fan 2 Pro**. Functionality with other models is based on the protocol implementation from the `python-miio` library and is not guaranteed.
+
+---
+
 ## Screenshots
 
 | Main Screen | HR Sensors | Settings |
 | :---: | :---: | :---: |
-| ![Main Screen](<https://github.com/chudzik28/SmartHR-FanControl/blob/master/assets/screenshot_main.jpg?raw=true>) | ![HR Sensors Screen](<https://github.com/chudzik28/SmartHR-FanControl/blob/master/assets/screenshot_hrsensors1.jpg?raw=true>) | ![Settings Screen](<https://github.com/chudzik28/SmartHR-FanControl/blob/master/assets/screenshot_automode_1.jpg?raw=true>) |
+| ![Main Screen](https://github.com/chudzik28/SmartHR-FanControl/blob/master/assets/screenshot_main.jpg?raw=true) | ![HR Sensors Screen](https://github.com/chudzik28/SmartHR-FanControl/blob/master/assets/screenshot_hrsensors1.jpg?raw=true) | ![Settings Screen](https://github.com/chudzik28/SmartHR-FanControl/blob/master/assets/screenshot_automode_1.jpg?raw=true) |
 
 ---
 
@@ -56,9 +81,7 @@ The core fan control logic in this application is a Kotlin reimplementation of t
 
 This is a hobby project developed in my free time. If you find this app useful, please consider supporting its development:
 
-<a href="<https://buymeacoffee.com/chudzim>">
-  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" >
-</a>
+[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://buymeacoffee.com/chudzim)
 
 ---
 
