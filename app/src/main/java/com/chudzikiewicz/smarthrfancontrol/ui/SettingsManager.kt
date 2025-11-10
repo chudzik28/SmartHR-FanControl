@@ -19,8 +19,10 @@ package com.chudzikiewicz.smarthrfancontrol.ui
 
 import com.chudzikiewicz.smarthrfancontrol.core.preferences.AlgorithmSettings
 import com.chudzikiewicz.smarthrfancontrol.core.preferences.UserPreferencesRepository
+import com.chudzikiewicz.smarthrfancontrol.features.fan_control.domain.FanController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -33,6 +35,8 @@ class SettingsManager(
     private val events: Channel<String>,
     private val onSettingsSaved: () -> Unit
 ) {
+    var fanController: FanController? = null
+
     private fun Int.isValidHrValue(): Boolean = this in 50..200
     private fun Int.isValidSpeedValue(): Boolean = this in 1..100
     private fun Double.isValidSmoothingFactor(): Boolean = this in 0.1..1.0
@@ -45,72 +49,76 @@ class SettingsManager(
     }
 
     fun onMinHrChanged(newMinHr: String) {
+        uiState.update { it.copy(minHrInput = newMinHr) }
         val hr = newMinHr.toIntOrNull()
+        val currentMaxHr = uiState.value.maxHrInput.toIntOrNull() ?: uiState.value.maxHr
         if (newMinHr.isBlank()) {
-            uiState.update { it.copy(minHrInput = newMinHr) }
-        } else if (hr != null && hr.isValidHrValue()) {
-            uiState.update { it.copy(minHrInput = newMinHr) }
-        } else {
+        } else if (hr == null || !hr.isValidHrValue()) {
             sendEvent("Error: HR must be between 50 and 200")
+            uiState.update { it.copy(minHrInput = it.minHr.toString()) }
+        } else if (hr >= currentMaxHr) {
+            sendEvent("Error: HR Min must be lower than HR Max ($currentMaxHr)")
             uiState.update { it.copy(minHrInput = it.minHr.toString()) }
         }
     }
 
     fun onMaxHrChanged(newMaxHr: String) {
+        uiState.update { it.copy(maxHrInput = newMaxHr) }
         val hr = newMaxHr.toIntOrNull()
+        val currentMinHr = uiState.value.minHrInput.toIntOrNull() ?: uiState.value.minHr
         if (newMaxHr.isBlank()) {
-            uiState.update { it.copy(maxHrInput = newMaxHr) }
-        } else if (hr != null && hr.isValidHrValue()) {
-            uiState.update { it.copy(maxHrInput = newMaxHr) }
-        } else {
+        } else if (hr == null || !hr.isValidHrValue()) {
             sendEvent("Error: HR must be between 50 and 200")
+            uiState.update { it.copy(maxHrInput = it.maxHr.toString()) }
+        } else if (hr <= currentMinHr) {
+            sendEvent("Error: HR Max must be higher than HR Min ($currentMinHr)")
             uiState.update { it.copy(maxHrInput = it.maxHr.toString()) }
         }
     }
 
     fun onMinSpeedChanged(newMinSpeed: String) {
+        uiState.update { it.copy(minSpeedInput = newMinSpeed) }
         val speed = newMinSpeed.toIntOrNull()
+        val currentMaxSpeed = uiState.value.maxSpeedInput.toIntOrNull() ?: uiState.value.maxSpeed
         if (newMinSpeed.isBlank()) {
-            uiState.update { it.copy(minSpeedInput = newMinSpeed) }
-        } else if (speed != null && speed.isValidSpeedValue()) {
-            uiState.update { it.copy(minSpeedInput = newMinSpeed) }
-        } else {
+        } else if (speed == null || !speed.isValidSpeedValue()) {
             sendEvent("Error: Speed must be between 1 and 100")
+            uiState.update { it.copy(minSpeedInput = it.minSpeed.toString()) }
+        } else if (speed >= currentMaxSpeed) {
+            sendEvent("Error: Speed Min must be lower than Speed Max ($currentMaxSpeed)")
             uiState.update { it.copy(minSpeedInput = it.minSpeed.toString()) }
         }
     }
 
     fun onMaxSpeedChanged(newMaxSpeed: String) {
+        uiState.update { it.copy(maxSpeedInput = newMaxSpeed) }
         val speed = newMaxSpeed.toIntOrNull()
+        val currentMinSpeed = uiState.value.minSpeedInput.toIntOrNull() ?: uiState.value.minSpeed
         if (newMaxSpeed.isBlank()) {
-            uiState.update { it.copy(maxSpeedInput = newMaxSpeed) }
-        } else if (speed != null && speed.isValidSpeedValue()) {
-            uiState.update { it.copy(maxSpeedInput = newMaxSpeed) }
-        } else {
+        } else if (speed == null || !speed.isValidSpeedValue()) {
             sendEvent("Error: Speed must be between 1 and 100")
+            uiState.update { it.copy(maxSpeedInput = it.maxSpeed.toString()) }
+        } else if (speed <= currentMinSpeed) {
+            sendEvent("Error: Speed Max must be higher than Speed Min ($currentMinSpeed)")
             uiState.update { it.copy(maxSpeedInput = it.maxSpeed.toString()) }
         }
     }
 
     fun onSmoothingChanged(newSmoothing: String) {
+        uiState.update { it.copy(smoothingInput = newSmoothing) }
         val smoothing = newSmoothing.replace(',', '.').toDoubleOrNull()
         if (newSmoothing.isBlank() || newSmoothing == ".") {
-            uiState.update { it.copy(smoothingInput = newSmoothing) }
-        } else if (smoothing != null && smoothing.isValidSmoothingFactor()) {
-            uiState.update { it.copy(smoothingInput = newSmoothing) }
-        } else {
+        } else if (smoothing == null || !smoothing.isValidSmoothingFactor()) {
             sendEvent("Error: Smoothing Factor must be between 0.1 and 1.0")
             uiState.update { it.copy(smoothingInput = it.smoothingFactor.toFormattedDecimalString()) }
         }
     }
 
     fun onExponentChanged(newExponent: String) {
+        uiState.update { it.copy(exponentInput = newExponent) }
         val exponent = newExponent.replace(',', '.').toDoubleOrNull()
         if (newExponent.isBlank() || newExponent == ".") {
-            uiState.update { it.copy(exponentInput = newExponent) }
-        } else if (exponent != null && exponent.isValidExponent()) {
-            uiState.update { it.copy(exponentInput = newExponent) }
-        } else {
+        } else if (exponent == null || !exponent.isValidExponent()) {
             sendEvent("Error: Exponent must be between 1.0 and 3.0")
             uiState.update { it.copy(exponentInput = it.exponent.toFormattedDecimalString()) }
         }
@@ -150,7 +158,7 @@ class SettingsManager(
     fun resetAutoModeConfig() {
         scope.launch {
             val defaultSettings = AlgorithmSettings(
-                minHr = 80, maxHr = 170, minSpeed = 10, maxSpeed = 100,
+                minHr = 80, maxHr = 160, minSpeed = 10, maxSpeed = 100,
                 smoothingFactor = 0.3, exponent = 2.2
             )
             repository.saveAlgorithmSettings(defaultSettings)
@@ -174,12 +182,17 @@ class SettingsManager(
     fun saveFanSettings() {
         scope.launch {
             val state = uiState.value
-            if (state.fanIpInput.isBlank() || state.fanTokenInput.isBlank()) {
-                events.send("Error: IP & Token can't be empty"); return@launch
+            if (state.fanIpInput.isBlank() || state.fanTokenInput.isBlank()) { events.send("Error: IP & Token can't be empty"); return@launch }
+            if (state.fanTokenInput.length != 32) { events.send("Error: Token must be 32 signs"); return@launch }
+
+            val isChangingConnection = state.fanIpInput != state.fanIpAddress || state.fanTokenInput != state.fanToken
+            val isFanOnAndConnected = state.isFanOn && state.fanConnectionStatus.startsWith("Connected")
+
+            if (isChangingConnection && isFanOnAndConnected) {
+                fanController?.toggleFan()
+                delay(500)
             }
-            if (state.fanTokenInput.length != 32) {
-                events.send("Error: Token must be 32 signs"); return@launch
-            }
+
             repository.saveFanSettings(state.fanIpInput, state.fanTokenInput)
             uiState.update { it.copy(fanIpAddress = state.fanIpInput, fanToken = state.fanTokenInput) }
             events.send("Fan Settings Saved")

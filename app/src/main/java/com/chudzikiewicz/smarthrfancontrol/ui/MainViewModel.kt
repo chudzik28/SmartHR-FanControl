@@ -96,7 +96,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         BluetoothStatusFlow.isBluetoothEnabled
             .onEach { isEnabled ->
                 _uiState.update { it.copy(isBluetoothEnabled = isEnabled) }
-
                 if (::bleClient.isInitialized) {
                     if (isEnabled) {
                         val selectedAddress = _uiState.value.selectedHrDeviceAddress
@@ -117,12 +116,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 if (::bleServer.isInitialized) {
                     viewModelScope.launch {
-                        if (isEnabled && _uiState.value.isHrSharingEnabled) {
+                        if (isEnabled && _uiState.value.isHrSharingEnabled && _uiState.value.selectedHrDeviceAddress != null) {
                             _uiState.update { it.copy(gattServerStatus = "Starting Server...") }
                             bleServer.startServer()
                         } else {
                             bleServer.stopServer()
-                            val newStatus = if (!isEnabled) "Bluetooth disabled" else "Server Stopped"
+                            val newStatus = if (!isEnabled) "Bluetooth disabled" else if (_uiState.value.selectedHrDeviceAddress == null) "HR sensor not selected" else "Server Stopped"
                             _uiState.update { it.copy(gattServerStatus = newStatus) }
                         }
                     }
@@ -164,9 +163,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 bleServer = BleServerManager(
                     context = application, btManager = btManager, btAdapter = btAdapter,
                     statusUpdateListener = { status ->
-                        if (_uiState.value.isBluetoothEnabled) {
-                            _uiState.update { it.copy(gattServerStatus = status) }
+                        val newStatus = if (!_uiState.value.isBluetoothEnabled) {
+                            "Bluetooth disabled"
+                        } else if (_uiState.value.selectedHrDeviceAddress == null) {
+                            "HR sensor not selected"
+                        } else {
+                            status
                         }
+                        _uiState.update { it.copy(gattServerStatus = newStatus) }
                     }
                 )
             }
@@ -192,6 +196,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
             val initialGattStatus = if (!isBluetoothOn) {
                 "Bluetooth disabled"
+            } else if (selectedAddress == null) {
+                "HR sensor not selected"
             } else if (!isHrSharingEnabled) {
                 "Server Stopped"
             } else {
@@ -270,23 +276,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         bleClient.connect()
                     } else {
                         bleClient.disconnect()
-                        val newStatus = if (!_uiState.value.isBluetoothEnabled) {
-                            "Enable Bluetooth to connect"
-                        } else if (address == null) {
-                            "No HR sensor selected"
-                        } else {
-                            "Disconnected"
-                        }
+                        val newStatus = if (!_uiState.value.isBluetoothEnabled) "Enable Bluetooth to connect" else "No HR sensor selected"
                         _uiState.update { it.copy(hrDeviceStatus = newStatus, isHrConnecting = false) }
-                        if (_uiState.value.isAutoModeEnabled && ::fanController.isInitialized) {
-                            fanController.disableAutoMode()
-                            _uiState.update { it.copy(isAutoModeEnabled = false) }
-                            viewModelScope.launch {
-                                _events.send("Auto Mode deactivated – no connection with HR sensor.")
-                            }
-                        }
                     }
                 }
+            }
+            if (address == null && _uiState.value.isHrSharingEnabled) {
+                toggleHrSharing(forceOff = true)
             }
         }.launchIn(viewModelScope)
     }
@@ -325,8 +321,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     onStateUpdate = { newState -> _uiState.value = newState },
                     getState = { _uiState.value }
                 )
+                settingsManager.fanController = fanController
                 _uiState.update { it.copy(fanConnectionStatus = "Connected to ${fan.deviceModel}", isFanConnecting = false) }
                 fanController.fetchStatus()
+            } else {
+                settingsManager.fanController = null
             }
         }
     }
@@ -388,18 +387,28 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun toggleHrSharing() {
-        val newState = !_uiState.value.isHrSharingEnabled
+    fun toggleHrSharing(forceOff: Boolean = false) {
+        val currentState = _uiState.value.isHrSharingEnabled
+        val newState = if (forceOff) false else !currentState
+        if (newState == currentState && !forceOff) return
+
         viewModelScope.launch {
             userPreferencesRepository.saveHrSharingEnabled(newState)
             _uiState.update { it.copy(isHrSharingEnabled = newState) }
+
             if (::bleServer.isInitialized) {
-                if (newState && _uiState.value.isBluetoothEnabled) {
+                if (newState && _uiState.value.isBluetoothEnabled && _uiState.value.selectedHrDeviceAddress != null) {
                     _uiState.update { it.copy(gattServerStatus = "Starting Server...") }
                     bleServer.startServer()
                 } else {
                     bleServer.stopServer()
-                    val newStatus = if (!_uiState.value.isBluetoothEnabled) "Bluetooth disabled" else "Server Stopped"
+                    val newStatus = if (!_uiState.value.isBluetoothEnabled) {
+                        "Bluetooth disabled"
+                    } else if (_uiState.value.selectedHrDeviceAddress == null) {
+                        "HR sensor not selected"
+                    } else {
+                        "Server Stopped"
+                    }
                     _uiState.update { it.copy(gattServerStatus = newStatus) }
                 }
             }
@@ -408,11 +417,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun onPermissionsGranted() {
         viewModelScope.launch {
-            delay(500)
+            delay(1000)
             val btManager = getApplication<Application>().getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
             val isBluetoothOn = btManager.adapter?.isEnabled == true
             BluetoothStatusFlow.updateStatus(isBluetoothOn)
-            if (::bleServer.isInitialized && _uiState.value.isBluetoothEnabled && _uiState.value.isHrSharingEnabled) {
+            if (::bleServer.isInitialized && _uiState.value.isBluetoothEnabled && _uiState.value.isHrSharingEnabled && _uiState.value.selectedHrDeviceAddress != null) {
                 _uiState.update { it.copy(gattServerStatus = "Starting Server...") }
                 bleServer.startServer()
             }

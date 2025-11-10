@@ -11,6 +11,23 @@ android {
     namespace = "com.chudzikiewicz.smarthrfancontrol"
     compileSdk = 36
 
+    signingConfigs {
+        create("release") {
+            // Bezpieczne odczytywanie danych z pliku gradle.properties
+            val keystoreFile = project.findProperty("keystore.file")?.let { rootProject.file(it as String) }
+            val keystorePassword = project.findProperty("keystore.password") as String?
+            val keyAlias = project.findProperty("key.alias") as String?
+            val keyPassword = project.findProperty("key.password") as String?
+
+            if (keystoreFile != null && keystoreFile.exists() && keystorePassword != null && keyAlias != null && keyPassword != null) {
+                storeFile = keystoreFile
+                storePassword = keystorePassword
+                this.keyAlias = keyAlias
+                this.keyPassword = keyPassword
+            }
+        }
+    }
+
     defaultConfig {
         applicationId = "com.chudzikiewicz.smarthrfancontrol"
         minSdk = 31
@@ -27,9 +44,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
-
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

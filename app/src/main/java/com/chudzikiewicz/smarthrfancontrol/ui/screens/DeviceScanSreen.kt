@@ -142,7 +142,7 @@ private fun DeviceScanContent(
                     Switch(
                         checked = uiState.isHrSharingEnabled,
                         onCheckedChange = { onToggleHrSharing() },
-                        enabled = uiState.isBluetoothEnabled
+                        enabled = uiState.isBluetoothEnabled && uiState.selectedHrDeviceAddress != null
                     )
                 }
             }

@@ -15,20 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.chudzikiewicz.smarthrfancontrol.ui.screens
 
 import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -37,22 +28,7 @@ import androidx.compose.material.icons.filled.BluetoothDisabled
 import androidx.compose.material.icons.filled.Coffee
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.WifiOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.DividerDefaults
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -78,13 +54,11 @@ fun MainScreen(viewModel: MainViewModel) {
 
     LaunchedEffect(key1 = true) {
         viewModel.events.collect { message ->
-            Toast.makeText(
-                context,
-                message,
-                Toast.LENGTH_LONG
-            ).show()
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
         }
     }
+
+    val isFanConnected = uiState.fanConnectionStatus.startsWith("Connected")
 
     Scaffold(
         topBar = {
@@ -114,18 +88,19 @@ fun MainScreen(viewModel: MainViewModel) {
             )
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 CompactStatusCard(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
                     title = "Fan Status",
                     status = uiState.fanConnectionStatus,
                     isConnecting = uiState.isFanConnecting
                 )
-
                 CompactStatusCard(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
                     title = "HR Sensor Status",
                     status = uiState.hrDeviceStatus,
                     isConnecting = uiState.isHrConnecting
@@ -144,21 +119,20 @@ fun MainScreen(viewModel: MainViewModel) {
                 fanSpeed = uiState.currentFanSpeed
             )
 
-            SupportButton(
-                url = "https://buymeacoffee.com/chudzim"
-            )
+            SupportButton(url = "https://buymeacoffee.com/chudzim")
 
             Spacer(modifier = Modifier.weight(1f))
 
             FanControlPanel(
                 uiState = uiState,
-                isPanelEnabled = uiState.isFanOn,
+                isPanelEnabled = isFanConnected && uiState.isFanOn,
                 onAutoModeToggle = { viewModel.toggleAutoMode() },
                 onManualSpeedChange = { viewModel.setManualFanSpeed(it) }
             )
 
             MasterToggleButton(
                 isFanOn = uiState.isFanOn,
+                isEnabled = isFanConnected,
                 onClick = { viewModel.toggleFan() }
             )
         }
@@ -181,39 +155,23 @@ private fun ReconnectAlerts(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (isFanVisible) {
-                ReconnectButton(
-                    modifier = Modifier.weight(1f),
-                    label = "Reconnect Fan",
-                    onClick = onFanClick
-                )
+                ReconnectButton(modifier = Modifier.weight(1f), label = "Reconnect Fan", onClick = onFanClick)
             }
             if (isHrVisible) {
-                ReconnectButton(
-                    modifier = Modifier.weight(1f),
-                    label = "Reconnect HR sensor",
-                    onClick = onHrClick
-                )
+                ReconnectButton(modifier = Modifier.weight(1f), label = "Reconnect HR sensor", onClick = onHrClick)
             }
         }
     }
 }
 
 @Composable
-private fun ReconnectButton(
-    modifier: Modifier = Modifier,
-    label: String,
-    onClick: () -> Unit
-) {
+private fun ReconnectButton(modifier: Modifier = Modifier, label: String, onClick: () -> Unit) {
     Button(
         onClick = onClick,
         modifier = modifier.height(48.dp),
         contentPadding = PaddingValues(horizontal = 16.dp)
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold
-        )
+        Text(text = label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -224,10 +182,8 @@ private fun CompactStatusCard(
     status: String,
     isConnecting: Boolean
 ) {
-    val fixedHeight = 100.dp
-
     ElevatedCard(
-        modifier = modifier.height(fixedHeight),
+        modifier = modifier.heightIn(min = 100.dp),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
     ) {
         Column(
@@ -235,24 +191,21 @@ private fun CompactStatusCard(
                 .fillMaxSize()
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = title.uppercase(Locale.getDefault()),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
+            Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = status,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.weight(1f, fill = false)
+                maxLines = 3
             )
-
+            Spacer(modifier = Modifier.weight(1f))
             if (isConnecting) {
                 LinearProgressIndicator(
                     modifier = Modifier
@@ -261,9 +214,7 @@ private fun CompactStatusCard(
                         .padding(top = 4.dp)
                 )
             } else {
-                Spacer(modifier = Modifier
-                    .height(4.dp)
-                    .padding(top = 4.dp))
+                Spacer(modifier = Modifier.height(4.dp).padding(top = 4.dp))
             }
         }
     }
@@ -276,7 +227,7 @@ private fun FanControlPanel(
     onAutoModeToggle: () -> Unit,
     onManualSpeedChange: (Int) -> Unit
 ) {
-    val isHrConnected = uiState.currentHeartRate > 0
+    val isHrSensorActive = uiState.selectedHrDeviceAddress != null && uiState.hrDeviceStatus.startsWith("Connected")
 
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -286,16 +237,15 @@ private fun FanControlPanel(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(16.dp)
         ) {
-            if (!isHrConnected) {
+            if (!isHrSensorActive) {
                 Text(
-                    text = "Connect HR sensor to access Auto Mode",
+                    text = "Connect HR sensor to use Auto Mode",
                     color = WarningSalmon,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
             }
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -303,33 +253,25 @@ private fun FanControlPanel(
             ) {
                 Text(
                     "Manual Mode",
-                    color = if (uiState.isAutoModeEnabled || !isPanelEnabled) MaterialTheme.colorScheme.onSurface.copy(
-                        alpha = 0.6f
-                    ) else MaterialTheme.colorScheme.primary,
+                    color = if (uiState.isAutoModeEnabled || !isPanelEnabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) else MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold
                 )
                 Switch(
                     checked = uiState.isAutoModeEnabled,
                     onCheckedChange = { onAutoModeToggle() },
-                    enabled = isPanelEnabled,
+                    enabled = isPanelEnabled && isHrSensorActive,
                 )
                 Text(
                     "Auto Mode",
-                    color = if (!uiState.isAutoModeEnabled && isPanelEnabled) MaterialTheme.colorScheme.onSurface.copy(
-                        alpha = 0.6f
-                    ) else MaterialTheme.colorScheme.primary,
+                    color = if (!uiState.isAutoModeEnabled && isPanelEnabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) else MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold
                 )
             }
-
             Spacer(modifier = Modifier.height(24.dp))
-
             Text(
                 "SPEED: ${uiState.currentFanSpeed}%",
                 style = MaterialTheme.typography.titleMedium,
-                color = if (!isPanelEnabled || uiState.isAutoModeEnabled) MaterialTheme.colorScheme.onSurface.copy(
-                    alpha = 0.38f
-                ) else MaterialTheme.colorScheme.onSurface
+                color = if (!isPanelEnabled || uiState.isAutoModeEnabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) else MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(8.dp))
             Slider(
@@ -344,9 +286,14 @@ private fun FanControlPanel(
 }
 
 @Composable
-private fun MasterToggleButton(isFanOn: Boolean, onClick: () -> Unit) {
+private fun MasterToggleButton(
+    isFanOn: Boolean,
+    isEnabled: Boolean,
+    onClick: () -> Unit
+) {
     Button(
         onClick = onClick,
+        enabled = isEnabled,
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp),
@@ -382,8 +329,7 @@ private fun ConnectivityStatusItem(label: String, isEnabled: Boolean) {
         "Bluetooth" -> if (isEnabled) Icons.Default.Bluetooth else Icons.Default.BluetoothDisabled
         else -> if (isEnabled) Icons.Default.Wifi else Icons.Default.WifiOff
     }
-    val color =
-        if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+    val color = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
     val text = if (isEnabled) "Enabled" else "Disabled"
 
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -432,7 +378,7 @@ private fun DataDisplayCard(heartRate: Int, fanSpeed: Int) {
 private fun DataColumn(label: String, value: String, unit: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = label,
+            text = label.uppercase(Locale.getDefault()),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -460,6 +406,6 @@ fun SupportButton(url: String) {
             modifier = Modifier.size(ButtonDefaults.IconSize)
         )
         Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-        Text("Buy me a coffee")
+        Text("Support the Project")
     }
 }
