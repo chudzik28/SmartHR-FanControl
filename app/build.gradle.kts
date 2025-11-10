@@ -10,11 +10,10 @@ plugins {
 android {
     namespace = "com.chudzikiewicz.smarthrfancontrol"
     compileSdk = 36
-    ndkVersion = "25.1.8937393"
     signingConfigs {
         create("release") {
-            // Bezpieczne odczytywanie danych z pliku gradle.properties
-            val keystoreFile = project.findProperty("keystore.file")?.let { rootProject.file(it as String) }
+            val keystoreFile =
+                project.findProperty("keystore.file")?.let { rootProject.file(it as String) }
             val keystorePassword = project.findProperty("keystore.password") as String?
             val keyAlias = project.findProperty("key.alias") as String?
             val keyPassword = project.findProperty("key.password") as String?
@@ -27,7 +26,6 @@ android {
             }
         }
     }
-
     defaultConfig {
         applicationId = "com.chudzikiewicz.smarthrfancontrol"
         minSdk = 31
@@ -35,9 +33,6 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        ndk {
-            abiFilters.addAll(listOf("arm64-v8a", "x86_64"))
-        }
     }
 
     buildTypes {
@@ -55,7 +50,17 @@ android {
         }
 
     }
-
+    buildFeatures {
+        compose = true
+    }
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -64,16 +69,6 @@ android {
     kotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
-        }
-    }
-
-    buildFeatures {
-        compose = true
-    }
-
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
 }
