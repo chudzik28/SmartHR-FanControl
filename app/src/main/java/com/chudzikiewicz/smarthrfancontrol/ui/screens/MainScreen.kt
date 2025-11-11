@@ -79,62 +79,67 @@ fun MainScreen(viewModel: MainViewModel) {
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ConnectivityStatusRow(
-                isWifiEnabled = uiState.isWifiEnabled,
-                isBluetoothEnabled = uiState.isBluetoothEnabled
-            )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            // Grupa 1: Górna część (statusy i dane)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                CompactStatusCard(
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    title = "Fan Status",
-                    status = uiState.fanConnectionStatus,
-                    isConnecting = uiState.isFanConnecting
+                ConnectivityStatusRow(
+                    isWifiEnabled = uiState.isWifiEnabled,
+                    isBluetoothEnabled = uiState.isBluetoothEnabled
                 )
-                CompactStatusCard(
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    title = "HR Sensor Status",
-                    status = uiState.hrDeviceStatus,
-                    isConnecting = uiState.isHrConnecting
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CompactStatusCard(
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                        title = "Fan Status",
+                        status = uiState.fanConnectionStatus,
+                        isConnecting = uiState.isFanConnecting
+                    )
+                    CompactStatusCard(
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                        title = "HR Sensor Status",
+                        status = uiState.hrDeviceStatus,
+                        isConnecting = uiState.isHrConnecting
+                    )
+                }
+                ReconnectAlerts(
+                    isFanVisible = uiState.isFanReconnectVisible,
+                    onFanClick = { viewModel.reconnectFan() },
+                    isHrVisible = uiState.isHrReconnectVisible,
+                    onHrClick = { viewModel.reconnectHr() }
                 )
+                DataDisplayCard(
+                    heartRate = uiState.currentHeartRate,
+                    fanSpeed = uiState.currentFanSpeed
+                )
+                SupportButton(url = "https://buymeacoffee.com/chudzim")
             }
 
-            ReconnectAlerts(
-                isFanVisible = uiState.isFanReconnectVisible,
-                onFanClick = { viewModel.reconnectFan() },
-                isHrVisible = uiState.isHrReconnectVisible,
-                onHrClick = { viewModel.reconnectHr() }
-            )
+            // "Sprężyna", która wypycha dolne elementy na dół ekranu
+            Spacer(modifier = Modifier.weight(1f, fill = true))
 
-            DataDisplayCard(
-                heartRate = uiState.currentHeartRate,
-                fanSpeed = uiState.currentFanSpeed
-            )
-
-            SupportButton(url = "https://buymeacoffee.com/chudzim")
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            FanControlPanel(
-                uiState = uiState,
-                isPanelEnabled = isFanConnected && uiState.isFanOn,
-                onAutoModeToggle = { viewModel.toggleAutoMode() },
-                onManualSpeedChange = { viewModel.setManualFanSpeed(it) }
-            )
-
-            MasterToggleButton(
-                isFanOn = uiState.isFanOn,
-                isEnabled = isFanConnected,
-                onClick = { viewModel.toggleFan() }
-            )
+            // Grupa 2: Dolna część (kontrolki)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                FanControlPanel(
+                    uiState = uiState,
+                    isPanelEnabled = isFanConnected && uiState.isFanOn,
+                    onAutoModeToggle = { viewModel.toggleAutoMode() },
+                    onManualSpeedChange = { viewModel.setManualFanSpeed(it) }
+                )
+                MasterToggleButton(
+                    isFanOn = uiState.isFanOn,
+                    isEnabled = isFanConnected,
+                    onClick = { viewModel.toggleFan() }
+                )
+            }
         }
     }
 }
@@ -228,7 +233,6 @@ private fun FanControlPanel(
     onManualSpeedChange: (Int) -> Unit
 ) {
     val isHrSensorActive = uiState.selectedHrDeviceAddress != null && uiState.hrDeviceStatus.startsWith("Connected")
-
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.elevatedCardElevation(4.dp)
