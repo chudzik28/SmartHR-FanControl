@@ -23,6 +23,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.content.Context
+import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
@@ -32,7 +33,7 @@ import androidx.lifecycle.viewModelScope
 import com.chudzikiewicz.smarthrfancontrol.core.ble.BleClientManager
 import com.chudzikiewicz.smarthrfancontrol.core.ble.BleDeviceManager
 import com.chudzikiewicz.smarthrfancontrol.core.ble.BleServerManager
-import com.chudzikiewicz.smarthrfancontrol.core.ble.BluetoothStatusFlow
+import com.chudzikiewicz.smarthrfancontrol.core.ble.BluetoothStateReceiver
 import com.chudzikiewicz.smarthrfancontrol.core.preferences.PairedHrDevice
 import com.chudzikiewicz.smarthrfancontrol.core.preferences.UserPreferencesRepository
 import com.chudzikiewicz.smarthrfancontrol.features.fan_control.data.Fan
@@ -65,6 +66,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private var wifiNetworkCallback: ConnectivityManager.NetworkCallback? = null
 
+    private val bluetoothStateReceiver = BluetoothStateReceiver()
+
     init {
         val btManager = application.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         val btAdapter: BluetoothAdapter? = btManager.adapter
@@ -93,7 +96,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.update { it.copy(haveTermsBeenAccepted = accepted) }
         }
 
-        BluetoothStatusFlow.isBluetoothEnabled
+        val filter = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
+        application.registerReceiver(bluetoothStateReceiver, filter)
+
+        bluetoothStateReceiver.isBluetoothEnabled
             .onEach { isEnabled ->
                 _uiState.update { it.copy(isBluetoothEnabled = isEnabled) }
                 if (::bleClient.isInitialized) {
@@ -136,7 +142,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val pairedDevices = userPreferencesRepository.pairedHrDevicesFlow.first()
             val selectedAddress = userPreferencesRepository.selectedHrDeviceAddressFlow.first()
             val isBluetoothOn = btAdapter?.isEnabled == true
-            BluetoothStatusFlow.updateStatus(isBluetoothOn)
+
+            bluetoothStateReceiver.updateInitialState(isBluetoothOn)
+
             _uiState.update { it.copy(isBluetoothEnabled = isBluetoothOn, isHrSharingEnabled = isHrSharingEnabled) }
             _uiState.update {
                 it.copy(
@@ -420,7 +428,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             delay(1000)
             val btManager = getApplication<Application>().getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
             val isBluetoothOn = btManager.adapter?.isEnabled == true
-            BluetoothStatusFlow.updateStatus(isBluetoothOn)
             if (::bleServer.isInitialized && _uiState.value.isBluetoothEnabled && _uiState.value.isHrSharingEnabled && _uiState.value.selectedHrDeviceAddress != null) {
                 _uiState.update { it.copy(gattServerStatus = "Starting Server...") }
                 bleServer.startServer()
@@ -430,6 +437,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     override fun onCleared() {
         super.onCleared()
+        getApplication<Application>().unregisterReceiver(bluetoothStateReceiver)
         wifiNetworkCallback?.let { connectivityManager.unregisterNetworkCallback(it) }
         if (::bleClient.isInitialized) bleClient.disconnect()
         if (::bleServer.isInitialized) bleServer.stopServer()

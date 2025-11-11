@@ -34,15 +34,6 @@
         android:theme="@style/Theme.App.Starting"
         >
 
-        <receiver
-            android:name=".core.ble.ManifestBluetoothStateReceiver"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.bluetooth.adapter.action.STATE_CHANGED" />
-            </intent-filter>
-        </receiver>
-
         <activity
             android:name=".MainActivity"
             android:exported="true"

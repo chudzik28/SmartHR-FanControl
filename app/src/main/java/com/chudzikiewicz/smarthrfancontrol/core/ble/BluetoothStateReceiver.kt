@@ -24,26 +24,21 @@ import android.content.Intent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-object BluetoothStatusFlow {
+class BluetoothStateReceiver : BroadcastReceiver() {
+
     private val _isBluetoothEnabled = MutableStateFlow(false)
     val isBluetoothEnabled = _isBluetoothEnabled.asStateFlow()
 
-    fun updateStatus(isEnabled: Boolean) {
-        _isBluetoothEnabled.value = isEnabled
-    }
-}
-
-class ManifestBluetoothStateReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         if (intent?.action == BluetoothAdapter.ACTION_STATE_CHANGED) {
-            val state = intent.getIntExtra(
-                BluetoothAdapter.EXTRA_STATE,
-                BluetoothAdapter.ERROR
-            )
-            val isEnabled =
-                state == BluetoothAdapter.STATE_ON || state == BluetoothAdapter.STATE_TURNING_ON
-
-            BluetoothStatusFlow.updateStatus(isEnabled)
+            val state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)
+            when(state) {
+                BluetoothAdapter.STATE_ON -> _isBluetoothEnabled.value = true
+                BluetoothAdapter.STATE_OFF -> _isBluetoothEnabled.value = false
+            }
         }
+    }
+    fun updateInitialState(isEnabled: Boolean) {
+        _isBluetoothEnabled.value = isEnabled
     }
 }
