@@ -36,7 +36,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,6 +49,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.chudzikiewicz.smarthrfancontrol.ui.MainUiState
 import com.chudzikiewicz.smarthrfancontrol.ui.SettingsManager
+import java.util.Locale
 
 @Composable
 fun HrAlgorithmInputFields(
@@ -57,24 +57,27 @@ fun HrAlgorithmInputFields(
     settingsManager: SettingsManager
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val onDoneAction: (String, (String) -> Unit) -> Unit = { value, flowAction ->
-        flowAction(value)
-        keyboardController?.hide()
-    }
+
     Column {
         SettingsRow(label = "Heart Rate Range") {
             ControlledNumericSettingField(
-                flowValue = viewModelUiState.minHrInput,
-                onFlowAction = settingsManager::onMinHrChanged,
-                onSaveAndHide = onDoneAction,
+                inputValue = viewModelUiState.minHrInput,
+                onValueChange = settingsManager::onMinHrChanged,
+                onCommit = {
+                    settingsManager.validateMinHrInput()
+                    keyboardController?.hide()
+                },
                 label = { Text("HR Min") },
                 modifier = Modifier.weight(1f)
             )
             Spacer(modifier = Modifier.width(8.dp))
             ControlledNumericSettingField(
-                flowValue = viewModelUiState.maxHrInput,
-                onFlowAction = settingsManager::onMaxHrChanged,
-                onSaveAndHide = onDoneAction,
+                inputValue = viewModelUiState.maxHrInput,
+                onValueChange = settingsManager::onMaxHrChanged,
+                onCommit = {
+                    settingsManager.validateMaxHrInput()
+                    keyboardController?.hide()
+                },
                 label = { Text("HR Max") },
                 modifier = Modifier.weight(1f)
             )
@@ -85,17 +88,23 @@ fun HrAlgorithmInputFields(
         }
         SettingsRow(label = "Fan Speed Range") {
             ControlledNumericSettingField(
-                flowValue = viewModelUiState.minSpeedInput,
-                onFlowAction = settingsManager::onMinSpeedChanged,
-                onSaveAndHide = onDoneAction,
+                inputValue = viewModelUiState.minSpeedInput,
+                onValueChange = settingsManager::onMinSpeedChanged,
+                onCommit = {
+                    settingsManager.validateMinSpeedInput()
+                    keyboardController?.hide()
+                },
                 label = { Text("Speed Min") },
                 modifier = Modifier.weight(1f)
             )
             Spacer(modifier = Modifier.width(8.dp))
             ControlledNumericSettingField(
-                flowValue = viewModelUiState.maxSpeedInput,
-                onFlowAction = settingsManager::onMaxSpeedChanged,
-                onSaveAndHide = onDoneAction,
+                inputValue = viewModelUiState.maxSpeedInput,
+                onValueChange = settingsManager::onMaxSpeedChanged,
+                onCommit = {
+                    settingsManager.validateMaxSpeedInput()
+                    keyboardController?.hide()
+                },
                 label = { Text("Speed Max") },
                 modifier = Modifier.weight(1f)
             )
@@ -107,9 +116,12 @@ fun HrAlgorithmInputFields(
 
         SettingsRow(label = "Reaction Curve") {
             ControlledDecimalSettingField(
-                flowValue = viewModelUiState.exponentInput,
-                onFlowAction = settingsManager::onExponentChanged,
-                onSaveAndHide = onDoneAction,
+                inputValue = viewModelUiState.exponentInput,
+                onValueChange = settingsManager::onExponentChanged,
+                onCommit = {
+                    settingsManager.validateExponentInput()
+                    keyboardController?.hide()
+                },
                 label = { Text("Exponent") },
                 modifier = Modifier.weight(1f)
             )
@@ -120,9 +132,12 @@ fun HrAlgorithmInputFields(
         }
         SettingsRow(label = "Smoothing Factor") {
             ControlledDecimalSettingField(
-                flowValue = viewModelUiState.smoothingInput,
-                onFlowAction = settingsManager::onSmoothingChanged,
-                onSaveAndHide = onDoneAction,
+                inputValue = viewModelUiState.smoothingInput,
+                onValueChange = settingsManager::onSmoothingChanged,
+                onCommit = {
+                    settingsManager.validateSmoothingInput()
+                    keyboardController?.hide()
+                },
                 label = { Text("") },
                 modifier = Modifier.weight(1f)
             )
@@ -136,65 +151,45 @@ fun HrAlgorithmInputFields(
 
 @Composable
 private fun ControlledNumericSettingField(
-    flowValue: String,
-    onFlowAction: (String) -> Unit,
-    onSaveAndHide: (String, (String) -> Unit) -> Unit,
+    inputValue: String,
+    onValueChange: (String) -> Unit,
+    onCommit: () -> Unit,
     label: @Composable () -> Unit,
     modifier: Modifier
 ) {
-    var localValue by remember(flowValue) { mutableStateOf(flowValue) }
-
-    LaunchedEffect(flowValue) {
-        localValue = flowValue
-    }
-
     OutlinedTextField(
-        value = localValue,
+        value = inputValue,
         onValueChange = { newValue ->
-            localValue = newValue.filter { it.isDigit() }
+            onValueChange(newValue.filter { it.isDigit() })
         },
         label = label,
         modifier = modifier
             .fillMaxWidth()
             .onFocusChanged { focusState ->
                 if (!focusState.isFocused) {
-                    localValue = flowValue
+                    onCommit()
                 }
             },
         singleLine = true,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Number,
-            imeAction = ImeAction.Done
-        ),
-        keyboardActions = KeyboardActions(
-            onDone = {
-                onSaveAndHide(localValue, onFlowAction)
-            }
-        )
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { onCommit() })
     )
 }
 
 @Composable
 private fun ControlledDecimalSettingField(
-    flowValue: String,
-    onFlowAction: (String) -> Unit,
-    onSaveAndHide: (String, (String) -> Unit) -> Unit,
+    inputValue: String,
+    onValueChange: (String) -> Unit,
+    onCommit: () -> Unit,
     label: @Composable () -> Unit,
     modifier: Modifier
 ) {
-    var localValue by remember(flowValue) { mutableStateOf(flowValue) }
-
-    LaunchedEffect(flowValue) {
-        localValue = flowValue
-    }
-
     OutlinedTextField(
-        value = localValue,
+        value = inputValue,
         onValueChange = { newValue ->
             val cleanValue = newValue.replace(',', '.')
-
             if (isValidDecimal(cleanValue)) {
-                localValue = cleanValue
+                onValueChange(cleanValue)
             }
         },
         label = label,
@@ -202,24 +197,17 @@ private fun ControlledDecimalSettingField(
             .fillMaxWidth()
             .onFocusChanged { focusState ->
                 if (!focusState.isFocused) {
-                    localValue = flowValue
+                    onCommit()
                 }
             },
         singleLine = true,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Decimal,
-            imeAction = ImeAction.Done
-        ),
-        keyboardActions = KeyboardActions(
-            onDone = {
-                onSaveAndHide(localValue, onFlowAction)
-            }
-        )
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { onCommit() })
     )
 }
 
 private fun isValidDecimal(input: String): Boolean {
-    if (input.isEmpty()) return true
+    if (input.isEmpty() || input == ".") return true
     input.toDoubleOrNull() ?: return false
 
     val parts = input.split('.')

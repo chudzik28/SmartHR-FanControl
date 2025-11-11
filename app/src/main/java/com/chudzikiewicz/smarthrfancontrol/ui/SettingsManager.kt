@@ -48,81 +48,105 @@ class SettingsManager(
         return String.format(Locale.US, "%.1f", this)
     }
 
-    fun onMinHrChanged(newMinHr: String) {
-        uiState.update { it.copy(minHrInput = newMinHr) }
-        val hr = newMinHr.toIntOrNull()
-        val currentMaxHr = uiState.value.maxHrInput.toIntOrNull() ?: uiState.value.maxHr
-        if (newMinHr.isBlank()) {
-        } else if (hr == null || !hr.isValidHrValue()) {
+    fun onMinHrChanged(newMinHr: String) = uiState.update { it.copy(minHrInput = newMinHr) }
+    fun onMaxHrChanged(newMaxHr: String) = uiState.update { it.copy(maxHrInput = newMaxHr) }
+    fun onMinSpeedChanged(newMinSpeed: String) = uiState.update { it.copy(minSpeedInput = newMinSpeed) }
+    fun onMaxSpeedChanged(newMaxSpeed: String) = uiState.update { it.copy(maxSpeedInput = newMaxSpeed) }
+    fun onSmoothingChanged(newSmoothing: String) = uiState.update { it.copy(smoothingInput = newSmoothing) }
+    fun onExponentChanged(newExponent: String) = uiState.update { it.copy(exponentInput = newExponent) }
+
+    fun validateMinHrInput() {
+        val state = uiState.value
+        val minHr = state.minHrInput.toIntOrNull()
+        val maxHr = state.maxHrInput.toIntOrNull()
+
+        if (minHr == null) {
+            sendEvent("Error: HR Min cannot be empty")
+            uiState.update { it.copy(minHrInput = it.minHr.toString()) }
+        } else if (!minHr.isValidHrValue()) {
             sendEvent("Error: HR must be between 50 and 200")
             uiState.update { it.copy(minHrInput = it.minHr.toString()) }
-        } else if (hr >= currentMaxHr) {
-            sendEvent("Error: HR Min must be lower than HR Max ($currentMaxHr)")
+        } else if (maxHr != null && minHr >= maxHr) {
+            sendEvent("Error: HR Min must be lower than HR Max ($maxHr)")
             uiState.update { it.copy(minHrInput = it.minHr.toString()) }
         }
     }
 
-    fun onMaxHrChanged(newMaxHr: String) {
-        uiState.update { it.copy(maxHrInput = newMaxHr) }
-        val hr = newMaxHr.toIntOrNull()
-        val currentMinHr = uiState.value.minHrInput.toIntOrNull() ?: uiState.value.minHr
-        if (newMaxHr.isBlank()) {
-        } else if (hr == null || !hr.isValidHrValue()) {
+    fun validateMaxHrInput() {
+        val state = uiState.value
+        val maxHr = state.maxHrInput.toIntOrNull()
+        val minHr = state.minHrInput.toIntOrNull()
+
+        if (maxHr == null) {
+            sendEvent("Error: HR Max cannot be empty")
+            uiState.update { it.copy(maxHrInput = it.maxHr.toString()) }
+        } else if (!maxHr.isValidHrValue()) {
             sendEvent("Error: HR must be between 50 and 200")
             uiState.update { it.copy(maxHrInput = it.maxHr.toString()) }
-        } else if (hr <= currentMinHr) {
-            sendEvent("Error: HR Max must be higher than HR Min ($currentMinHr)")
+        } else if (minHr != null && maxHr <= minHr) {
+            sendEvent("Error: HR Max must be higher than HR Min ($minHr)")
             uiState.update { it.copy(maxHrInput = it.maxHr.toString()) }
         }
     }
 
-    fun onMinSpeedChanged(newMinSpeed: String) {
-        uiState.update { it.copy(minSpeedInput = newMinSpeed) }
-        val speed = newMinSpeed.toIntOrNull()
-        val currentMaxSpeed = uiState.value.maxSpeedInput.toIntOrNull() ?: uiState.value.maxSpeed
-        if (newMinSpeed.isBlank()) {
-        } else if (speed == null || !speed.isValidSpeedValue()) {
+    fun validateMinSpeedInput() {
+        val state = uiState.value
+        val minSpeed = state.minSpeedInput.toIntOrNull()
+        val maxSpeed = state.maxSpeedInput.toIntOrNull()
+
+        if (minSpeed == null) {
+            sendEvent("Error: Speed Min cannot be empty")
+            uiState.update { it.copy(minSpeedInput = it.minSpeed.toString()) }
+        } else if (!minSpeed.isValidSpeedValue()) {
             sendEvent("Error: Speed must be between 1 and 100")
             uiState.update { it.copy(minSpeedInput = it.minSpeed.toString()) }
-        } else if (speed >= currentMaxSpeed) {
-            sendEvent("Error: Speed Min must be lower than Speed Max ($currentMaxSpeed)")
+        } else if (maxSpeed != null && minSpeed >= maxSpeed) {
+            sendEvent("Error: Speed Min must be lower than Speed Max ($maxSpeed)")
             uiState.update { it.copy(minSpeedInput = it.minSpeed.toString()) }
         }
     }
 
-    fun onMaxSpeedChanged(newMaxSpeed: String) {
-        uiState.update { it.copy(maxSpeedInput = newMaxSpeed) }
-        val speed = newMaxSpeed.toIntOrNull()
-        val currentMinSpeed = uiState.value.minSpeedInput.toIntOrNull() ?: uiState.value.minSpeed
-        if (newMaxSpeed.isBlank()) {
-        } else if (speed == null || !speed.isValidSpeedValue()) {
+    fun validateMaxSpeedInput() {
+        val state = uiState.value
+        val maxSpeed = state.maxSpeedInput.toIntOrNull()
+        val minSpeed = state.minSpeedInput.toIntOrNull()
+
+        if (maxSpeed == null) {
+            sendEvent("Error: Speed Max cannot be empty")
+            uiState.update { it.copy(maxSpeedInput = it.maxSpeed.toString()) }
+        } else if (!maxSpeed.isValidSpeedValue()) {
             sendEvent("Error: Speed must be between 1 and 100")
             uiState.update { it.copy(maxSpeedInput = it.maxSpeed.toString()) }
-        } else if (speed <= currentMinSpeed) {
-            sendEvent("Error: Speed Max must be higher than Speed Min ($currentMinSpeed)")
+        } else if (minSpeed != null && maxSpeed <= minSpeed) {
+            sendEvent("Error: Speed Max must be higher than Speed Min ($minSpeed)")
             uiState.update { it.copy(maxSpeedInput = it.maxSpeed.toString()) }
         }
     }
 
-    fun onSmoothingChanged(newSmoothing: String) {
-        uiState.update { it.copy(smoothingInput = newSmoothing) }
-        val smoothing = newSmoothing.replace(',', '.').toDoubleOrNull()
-        if (newSmoothing.isBlank() || newSmoothing == ".") {
-        } else if (smoothing == null || !smoothing.isValidSmoothingFactor()) {
+    fun validateSmoothingInput() {
+        val state = uiState.value
+        val smoothing = state.smoothingInput.replace(',', '.').toDoubleOrNull()
+        if (smoothing == null) {
+            sendEvent("Error: Smoothing Factor cannot be empty")
+            uiState.update { it.copy(smoothingInput = it.smoothingFactor.toFormattedDecimalString()) }
+        } else if (!smoothing.isValidSmoothingFactor()) {
             sendEvent("Error: Smoothing Factor must be between 0.1 and 1.0")
             uiState.update { it.copy(smoothingInput = it.smoothingFactor.toFormattedDecimalString()) }
         }
     }
 
-    fun onExponentChanged(newExponent: String) {
-        uiState.update { it.copy(exponentInput = newExponent) }
-        val exponent = newExponent.replace(',', '.').toDoubleOrNull()
-        if (newExponent.isBlank() || newExponent == ".") {
-        } else if (exponent == null || !exponent.isValidExponent()) {
+    fun validateExponentInput() {
+        val state = uiState.value
+        val exponent = state.exponentInput.replace(',', '.').toDoubleOrNull()
+        if (exponent == null) {
+            sendEvent("Error: Exponent cannot be empty")
+            uiState.update { it.copy(exponentInput = it.exponent.toFormattedDecimalString()) }
+        } else if (!exponent.isValidExponent()) {
             sendEvent("Error: Exponent must be between 1.0 and 3.0")
             uiState.update { it.copy(exponentInput = it.exponent.toFormattedDecimalString()) }
         }
     }
+
 
     fun onFanIpChanged(newIp: String) = uiState.update { it.copy(fanIpInput = newIp) }
     fun onFanTokenChanged(newToken: String) = uiState.update { it.copy(fanTokenInput = newToken) }
@@ -199,9 +223,19 @@ class SettingsManager(
             onSettingsSaved()
         }
     }
+
     fun saveAlgorithmSettings() {
+        validateMinHrInput()
+        validateMaxHrInput()
+        validateMinSpeedInput()
+        validateMaxSpeedInput()
+        validateSmoothingInput()
+        validateExponentInput()
+
         scope.launch {
+            delay(50)
             val state = uiState.value
+
             val minHr = state.minHrInput.toIntOrNull()
             val maxHr = state.maxHrInput.toIntOrNull()
             val minSpeed = state.minSpeedInput.toIntOrNull()
@@ -209,32 +243,13 @@ class SettingsManager(
             val smoothing = state.smoothingInput.replace(',', '.').toDoubleOrNull()
             val exponent = state.exponentInput.replace(',', '.').toDoubleOrNull()
 
-            if (minHr == null || maxHr == null || minSpeed == null || maxSpeed == null || smoothing == null || exponent == null) {
-                events.send("Error: All fields must contain valid numbers"); return@launch
-            }
-            if (!minHr.isValidHrValue() || !maxHr.isValidHrValue()) {
-                events.send("Error: HR outside the range of 50-200 BPM."); return@launch
-            }
-            if (!minSpeed.isValidSpeedValue() || !maxSpeed.isValidSpeedValue()) {
-                events.send("Error: Speed outside the range 1-100%."); return@launch
-            }
-            if (!smoothing.isValidSmoothingFactor()) {
-                events.send("Error: Smoothing value must be in the range 0.1 - 1.0."); return@launch
-            }
-            if (!exponent.isValidExponent()) {
-                events.send("Error: Exponent value must be in the range 1.0 - 3.0."); return@launch
-            }
-            if (minHr >= maxHr) {
-                events.send("Error: HR Min must be lower HR Max"); return@launch
-            }
-            if (minSpeed >= maxSpeed) {
-                events.send("Error: Speed Min must be lower than Speed Max"); return@launch
+            if (minHr == null || maxHr == null || minSpeed == null || maxSpeed == null || smoothing == null || exponent == null ||
+                !minHr.isValidHrValue() || !maxHr.isValidHrValue() || !minSpeed.isValidSpeedValue() || !maxSpeed.isValidSpeedValue() ||
+                !smoothing.isValidSmoothingFactor() || !exponent.isValidExponent() || minHr >= maxHr || minSpeed >= maxSpeed) {
+                return@launch
             }
 
-            val algoSettings = AlgorithmSettings(
-                minHr = minHr, maxHr = maxHr, minSpeed = minSpeed, maxSpeed = maxSpeed,
-                smoothingFactor = smoothing, exponent = exponent
-            )
+            val algoSettings = AlgorithmSettings(minHr, maxHr, minSpeed, maxSpeed, smoothing, exponent)
             repository.saveAlgorithmSettings(algoSettings)
             uiState.update {
                 it.copy(

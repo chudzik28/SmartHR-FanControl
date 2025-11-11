@@ -23,46 +23,16 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
@@ -258,22 +228,37 @@ private fun HrConfigContent(
     settingsManager: SettingsManager,
     onResetClick: () -> Unit
 ) {
-    val settings = remember(
+    val settingsForChart = remember(
         uiState.minHrInput, uiState.maxHrInput,
         uiState.minSpeedInput, uiState.maxSpeedInput,
         uiState.exponentInput, uiState.smoothingInput
     ) {
-        AlgorithmSettings(
-            minHr = uiState.minHrInput.toIntOrNull() ?: uiState.minHr,
-            maxHr = uiState.maxHrInput.toIntOrNull() ?: uiState.maxHr,
-            minSpeed = uiState.minSpeedInput.toIntOrNull() ?: uiState.minSpeed,
-            maxSpeed = uiState.maxSpeedInput.toIntOrNull() ?: uiState.maxSpeed,
-            smoothingFactor = uiState.smoothingInput.replace(',', '.').toDoubleOrNull()
-                ?: uiState.smoothingFactor,
-            exponent = uiState.exponentInput.replace(',', '.').toDoubleOrNull() ?: uiState.exponent
-        )
+        val minHr = uiState.minHrInput.toIntOrNull()
+        val maxHr = uiState.maxHrInput.toIntOrNull()
+        val minSpeed = uiState.minSpeedInput.toIntOrNull()
+        val maxSpeed = uiState.maxSpeedInput.toIntOrNull()
+        val smoothingFactor = uiState.smoothingInput.replace(',', '.').toDoubleOrNull()
+        val exponent = uiState.exponentInput.replace(',', '.').toDoubleOrNull()
+
+        val isInputStateValid = minHr != null && maxHr != null && minSpeed != null && maxSpeed != null &&
+                smoothingFactor != null && exponent != null &&
+                minHr < maxHr && minSpeed < maxSpeed
+
+        if (isInputStateValid) {
+            AlgorithmSettings(minHr, maxHr, minSpeed, maxSpeed, smoothingFactor, exponent)
+        } else {
+            AlgorithmSettings(
+                minHr = uiState.minHr,
+                maxHr = uiState.maxHr,
+                minSpeed = uiState.minSpeed,
+                maxSpeed = uiState.maxSpeed,
+                smoothingFactor = uiState.smoothingFactor,
+                exponent = uiState.exponent
+            )
+        }
     }
-    val chartPoints = remember(settings) { generateChartPoints(settings) }
+
+    val chartPoints = remember(settingsForChart) { generateChartPoints(settingsForChart) }
 
     Column(
         modifier = Modifier
@@ -323,7 +308,7 @@ private fun HrConfigContent(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-                FanCurveChart(chartPoints = chartPoints, settings = settings)
+                FanCurveChart(chartPoints = chartPoints, settings = settingsForChart)
             }
         }
         Spacer(modifier = Modifier.weight(1f))
@@ -474,6 +459,26 @@ fun ResetConfirmationDialog(
             TextButton(onClick = onDismiss) {
                 Text("Cancel")
             }
+        }
+    )
+}
+
+@Composable
+fun HtmlText(html: String, modifier: Modifier = Modifier) {
+    val textColor = MaterialTheme.colorScheme.onSurface
+    val linkColor = MaterialTheme.colorScheme.primary
+
+    AndroidView(
+        modifier = modifier.fillMaxWidth(),
+        factory = { context ->
+            TextView(context).apply {
+                movementMethod = LinkMovementMethod.getInstance()
+                setTextColor(textColor.toArgb())
+                setLinkTextColor(linkColor.toArgb())
+            }
+        },
+        update = {
+            it.text = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_COMPACT)
         }
     )
 }

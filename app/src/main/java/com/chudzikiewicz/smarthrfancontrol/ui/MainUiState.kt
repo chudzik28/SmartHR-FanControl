@@ -32,7 +32,7 @@ data class MainUiState(
     val fanIpAddress: String = "",
     val fanToken: String = "",
     val minHr: Int = 80,
-    val maxHr: Int = 170,
+    val maxHr: Int = 160,
     val minSpeed: Int = 10,
     val maxSpeed: Int = 100,
     val smoothingFactor: Double = 0.3,
