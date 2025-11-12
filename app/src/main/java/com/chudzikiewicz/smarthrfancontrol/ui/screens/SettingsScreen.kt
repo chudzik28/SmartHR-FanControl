@@ -110,9 +110,11 @@ fun SettingsScreen(navController: NavController, viewModel: MainViewModel) {
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.titleLarge
                     )
-                }
+                },
+                windowInsets = WindowInsets(0)
             )
-        }
+        },
+        contentWindowInsets = WindowInsets(0)
     ) { paddingValues ->
         Column(
             modifier = Modifier

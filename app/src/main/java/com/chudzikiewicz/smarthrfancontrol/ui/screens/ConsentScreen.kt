@@ -15,10 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.chudzikiewicz.smarthrfancontrol.ui.screens
 
-import android.text.method.LinkMovementMethod
-import android.widget.TextView
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -31,13 +30,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.text.HtmlCompat
+import androidx.compose.ui.res.stringResource
 import com.chudzikiewicz.smarthrfancontrol.R
 import com.chudzikiewicz.smarthrfancontrol.ui.components.HtmlText
 
@@ -53,22 +49,37 @@ fun ConsentScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Welcome to SmartHR FanControl", fontWeight = FontWeight.Bold) }
+                title = {
+                    Text(
+                        "Welcome to SmartHR FanControl",
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             )
         },
         bottomBar = {
-            Button(
-                onClick = onContinueClicked,
-                enabled = allAccepted,
+            // 👇 dolny pasek z bezpiecznym marginesem nad systemową nawigacją
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
-                    .height(56.dp)
+                    .windowInsetsPadding(WindowInsets.navigationBars) // bezpieczna strefa
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("ACCEPT & CONTINUE")
+                Button(
+                    onClick = onContinueClicked,
+                    enabled = allAccepted,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                ) {
+                    Text("ACCEPT & CONTINUE")
+                }
             }
-        }
+        },
+        contentWindowInsets = WindowInsets(0) // 👈 wyłącz domyślne insets w Scaffoldzie
     ) { paddingValues ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -85,7 +96,6 @@ fun ConsentScreen(
                         "I hope you'll find it useful! " +
                         "I do not receive any income for creating it. " +
                         "If you appreciate my work you can always support me by clicking the button on main screen.",
-
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -168,7 +178,6 @@ private fun ExpandableText(
         }
     }
 }
-
 
 @Composable
 private fun CheckboxRow(

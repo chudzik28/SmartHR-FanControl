@@ -69,39 +69,54 @@ fun MainScreen(viewModel: MainViewModel) {
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.titleLarge
                     )
-                }
+                },
+                windowInsets = WindowInsets(0)
             )
         },
+        contentWindowInsets = WindowInsets(0)
     ) { paddingValues ->
-        Column(
+        // POPRAWIONA STRUKTURA LAYOUTU
+        // Zewnętrzny Box aplikuje marginesy systemowe (paddingValues)
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Grupa 1: Górna część (statusy i dane)
+            // Wewnętrzna, przewijana kolumna ma już własne marginesy dla treści
             Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                // Dodajemy odstęp na górze i na dole listy, aby treść
+                // nie przylegała do krawędzi przy przewijaniu
+                Spacer(modifier = Modifier.height(8.dp))
+
                 ConnectivityStatusRow(
                     isWifiEnabled = uiState.isWifiEnabled,
                     isBluetoothEnabled = uiState.isBluetoothEnabled
                 )
                 Row(
-                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     CompactStatusCard(
-                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
                         title = "Fan Status",
                         status = uiState.fanConnectionStatus,
                         isConnecting = uiState.isFanConnecting
                     )
                     CompactStatusCard(
-                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
                         title = "HR Sensor Status",
                         status = uiState.hrDeviceStatus,
                         isConnecting = uiState.isHrConnecting
@@ -117,17 +132,6 @@ fun MainScreen(viewModel: MainViewModel) {
                     heartRate = uiState.currentHeartRate,
                     fanSpeed = uiState.currentFanSpeed
                 )
-                SupportButton(url = "https://buymeacoffee.com/chudzim")
-            }
-
-            // "Sprężyna", która wypycha dolne elementy na dół ekranu
-            Spacer(modifier = Modifier.weight(1f, fill = true))
-
-            // Grupa 2: Dolna część (kontrolki)
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
                 FanControlPanel(
                     uiState = uiState,
                     isPanelEnabled = isFanConnected && uiState.isFanOn,
@@ -139,10 +143,14 @@ fun MainScreen(viewModel: MainViewModel) {
                     isEnabled = isFanConnected,
                     onClick = { viewModel.toggleFan() }
                 )
+                SupportButton(url = "https://buymeacoffee.com/chudzim")
+
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
 }
+
 
 @Composable
 private fun ReconnectAlerts(
@@ -154,8 +162,7 @@ private fun ReconnectAlerts(
     if (isFanVisible || isHrVisible) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -317,8 +324,7 @@ private fun MasterToggleButton(
 private fun ConnectivityStatusRow(isWifiEnabled: Boolean, isBluetoothEnabled: Boolean) {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         ConnectivityStatusItem(label = "Wi-Fi", isEnabled = isWifiEnabled)
